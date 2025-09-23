@@ -46,7 +46,6 @@ public class JwtUtils {
     public boolean validateJwtToken(String authToken){
         try {
             Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(authToken);
-            System.out.println("Logado com sucesso");
             return true;
 
         } catch(MalformedJwtException e){

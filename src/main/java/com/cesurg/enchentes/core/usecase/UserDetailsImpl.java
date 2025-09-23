@@ -60,4 +60,8 @@ public class UserDetailsImpl implements UserDetails {
     public UserRole getRole() {
         return role;
     }
+
+    public int getId() {
+        return id;
+    }
 }

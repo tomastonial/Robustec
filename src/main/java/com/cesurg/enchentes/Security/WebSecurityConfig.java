@@ -48,11 +48,11 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/usuario/cadastro").permitAll()
                         .requestMatchers("/usuario").hasRole("ADMIN")
-                        .requestMatchers("/usuario/**").hasRole("ADMIN")
+                        .requestMatchers("/usuario/**").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/produto").hasAnyRole("USER", "ENGENHARIA", "ADMIN")
-                        .requestMatchers("/produto/cadastro").hasRole("ENGENHARIA")
-                        .requestMatchers("/produto/**").hasRole("ENGENHARIA")
-                        .requestMatchers("/produto/delete/**").hasRole("ENGENHARIA")
+                        .requestMatchers("/produto/cadastro").hasAnyRole("ENGENHARIA", "ADMIN")
+                        .requestMatchers("/produto/**").hasAnyRole("ENGENHARIA", "ADMIN")
+                        .requestMatchers("/produto/delete/**").hasAnyRole("ENGENHARIA", "ADMIN")
                         .anyRequest().authenticated());
 
         http.addFilterBefore(authFilterToken(), UsernamePasswordAuthenticationFilter.class);

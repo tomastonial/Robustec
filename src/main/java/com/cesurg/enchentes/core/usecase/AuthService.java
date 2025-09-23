@@ -37,7 +37,7 @@ public class AuthService {
             // Gera token
             String token = jwtUtils.generateTokenFromUserDetailsImpl(userDetails);
 
-            return new AcessDto(token, userDetails.getUsername(), userDetails.getRole().name());
+            return new AcessDto(token, userDetails.getUsername(), userDetails.getRole().name(), userDetails.getId());
 
         } catch (BadCredentialsException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário ou senha inválidos");
