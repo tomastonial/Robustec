@@ -47,6 +47,13 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/usuario/cadastro").permitAll()
+                        .requestMatchers("/usuario").hasRole("ADMIN")
+                        .requestMatchers("/usuario/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/produto/filtro").hasAnyRole("USER", "ENGENHARIA", "ADMIN")
+                        .requestMatchers("/produto").hasAnyRole("USER", "ENGENHARIA", "ADMIN")
+                        .requestMatchers("/produto/cadastro").hasAnyRole("ENGENHARIA", "ADMIN")
+                        .requestMatchers("/produto/**").hasAnyRole("ENGENHARIA", "ADMIN")
+                        .requestMatchers("/produto/delete/**").hasAnyRole("ENGENHARIA", "ADMIN")
                         .anyRequest().authenticated());
 
         http.addFilterBefore(authFilterToken(), UsernamePasswordAuthenticationFilter.class);

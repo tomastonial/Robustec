@@ -1,11 +1,14 @@
 package com.cesurg.enchentes.core.usecase;
 
+import com.cesurg.enchentes.core.domain.entity.UserRole;
 import com.cesurg.enchentes.core.domain.entity.Usuario;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class UserDetailsImpl implements UserDetails {
 
@@ -13,32 +16,35 @@ public class UserDetailsImpl implements UserDetails {
     private String email;
     private String password;
     private String username;
+    private UserRole role;
 
     public static UserDetailsImpl build(Usuario usuario){
         return new UserDetailsImpl(
-                usuario.getEmail(),
                 usuario.getId(),
-                usuario.getNome(),
+                usuario.getEmail(),
                 usuario.getSenha(),
-                new ArrayList<>()
+                usuario.getNome(),
+                usuario.getRole()
         );
     }
 
-    private Collection<? extends GrantedAuthority> authorities;
-
-
-
-    public UserDetailsImpl(String email, int id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
-        this.email = email;
+    public UserDetailsImpl(int id, String email, String password, String username, UserRole role) {
         this.id = id;
-        this.username = username;
+        this.email = email;
         this.password = password;
-        this.authorities = authorities;
+        this.username = username;
+        this.role = role;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        if(this.role == UserRole.ADMIN){
+            return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
+        }else if (this.role == UserRole.ENGENHARIA) {
+            return List.of(new SimpleGrantedAuthority("ROLE_ENGENHARIA"), new SimpleGrantedAuthority("ROLE_USER"));
+        }else {
+            return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        }
     }
 
     @Override
@@ -51,4 +57,11 @@ public class UserDetailsImpl implements UserDetails {
         return username;
     }
 
+    public UserRole getRole() {
+        return role;
+    }
+
+    public int getId() {
+        return id;
+    }
 }

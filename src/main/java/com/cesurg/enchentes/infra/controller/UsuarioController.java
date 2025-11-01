@@ -23,7 +23,7 @@ public class UsuarioController {
         usuarioUseCase.update(id, usuario);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/usuario/delete/{id}")
     public void delete(@PathVariable int id) {
         usuarioUseCase.delete(id);
     }
@@ -31,6 +31,11 @@ public class UsuarioController {
     @GetMapping("/usuario/{id}")
     public Usuario findById(@PathVariable int id) {
         return usuarioUseCase.findById(id);
+    }
+
+    @GetMapping("/usuario/role/{id}")
+    public String getRole(@PathVariable int id) {
+        return usuarioUseCase.getRole(id);
     }
 
     @GetMapping("/usuario")

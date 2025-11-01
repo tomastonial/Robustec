@@ -19,14 +19,15 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
     @Override
     public void create(Usuario usuario) {
         var query = """
-                INSERT INTO usuario (nome, email, senha, ativo)
-                VALUES (:nome, :email, :senha, :ativo)
+                INSERT INTO usuario (nome, email, senha, ativo, role)
+                VALUES (:nome, :email, :senha, :ativo, :role)
                 """;
         entityManager.createNativeQuery(query)
                 .setParameter("nome", usuario.getNome())
                 .setParameter("email", usuario.getEmail())
                 .setParameter("senha", usuario.getSenha())
                 .setParameter("ativo", usuario.getAtivo())
+                .setParameter("role", usuario.getRole().toString())
                 .executeUpdate();
     }
 
@@ -35,7 +36,7 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
     public void update(int id, Usuario usuario) {
         var query = """
                 UPDATE usuario
-                SET nome = :nome, email = :email, senha = :senha, ativo = :ativo
+                SET nome = :nome, email = :email, senha = :senha, ativo = :ativo, role = :role
                 WHERE id = :id
                 """;
         entityManager.createNativeQuery(query)
@@ -43,6 +44,7 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
                 .setParameter("email", usuario.getEmail())
                 .setParameter("senha", usuario.getSenha())
                 .setParameter("ativo", usuario.getAtivo())
+                .setParameter("role", usuario.getRole().toString())
                 .setParameter("id", id)
                 .executeUpdate();
     }
@@ -60,6 +62,14 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
     public Usuario findById(int id) {
         var query = "SELECT * FROM usuario WHERE id = :id";
         return (Usuario) entityManager.createNativeQuery(query, Usuario.class)
+                .setParameter("id", id)
+                .getSingleResult();
+    }
+
+    @Override
+    public String getRole(int id) {
+        var query = "SELECT role FROM usuario WHERE id = :id";
+        return (String) entityManager.createNativeQuery(query)
                 .setParameter("id", id)
                 .getSingleResult();
     }

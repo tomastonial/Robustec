@@ -45,6 +45,11 @@ public class UsuarioUseCaseImpl implements UsuarioUseCase {
     }
 
     @Override
+    public String getRole(int id) {
+        return usuarioRepository.getRole(id);
+    }
+
+    @Override
     public List<Usuario> findAll() {
         return usuarioRepository.findAll();
     }

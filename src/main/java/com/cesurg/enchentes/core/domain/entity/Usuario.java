@@ -1,8 +1,6 @@
 package com.cesurg.enchentes.core.domain.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
@@ -26,6 +24,10 @@ public class Usuario {
 
     @Column(name = "data_criacao")
     private LocalDateTime data_criacao;
+
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private UserRole role = UserRole.USER;
 
     public int getId() {
         return id;
@@ -73,5 +75,13 @@ public class Usuario {
 
     public void setData_criacao(LocalDateTime data_criacao) {
         this.data_criacao = data_criacao;
+    }
+
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
     }
 }
