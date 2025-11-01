@@ -33,6 +33,11 @@ public class UsuarioController {
         return usuarioUseCase.findById(id);
     }
 
+    @GetMapping("/usuario/role/{id}")
+    public String getRole(@PathVariable int id) {
+        return usuarioUseCase.getRole(id);
+    }
+
     @GetMapping("/usuario")
     public List<Usuario> findAll() {
         return usuarioUseCase.findAll();

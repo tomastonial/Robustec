@@ -67,6 +67,14 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
     }
 
     @Override
+    public String getRole(int id) {
+        var query = "SELECT role FROM usuario WHERE id = :id";
+        return (String) entityManager.createNativeQuery(query)
+                .setParameter("id", id)
+                .getSingleResult();
+    }
+
+    @Override
     public List<Usuario> findAll() {
         var query = "SELECT * FROM usuario";
         return entityManager.createNativeQuery(query, Usuario.class)

@@ -40,6 +40,20 @@ public class Produto {
     @Column(name = "base")
     private String base;
 
+    @Column(name = "url_imagem")
+    private String url_imagem;
+
+    @Column(name = "categoria")
+    private String categoria;
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
+    }
+
     public int getId() {
         return id;
     }
@@ -126,5 +140,13 @@ public class Produto {
 
     public void setBase(String base) {
         this.base = base;
+    }
+
+    public String getUrl_imagem() {
+        return url_imagem;
+    }
+
+    public void setUrl_imagem(String url_imagem) {
+        this.url_imagem = url_imagem;
     }
 }

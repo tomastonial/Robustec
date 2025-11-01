@@ -49,6 +49,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/usuario/cadastro").permitAll()
                         .requestMatchers("/usuario").hasRole("ADMIN")
                         .requestMatchers("/usuario/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/produto/filtro").hasAnyRole("USER", "ENGENHARIA", "ADMIN")
                         .requestMatchers("/produto").hasAnyRole("USER", "ENGENHARIA", "ADMIN")
                         .requestMatchers("/produto/cadastro").hasAnyRole("ENGENHARIA", "ADMIN")
                         .requestMatchers("/produto/**").hasAnyRole("ENGENHARIA", "ADMIN")
