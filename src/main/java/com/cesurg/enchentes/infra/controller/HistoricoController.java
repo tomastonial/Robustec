@@ -2,20 +2,21 @@ package com.cesurg.enchentes.infra.controller;
 
 import com.cesurg.enchentes.core.domain.contract.historico.HistoricoUseCase;
 import com.cesurg.enchentes.core.domain.entity.Historico;
+import com.cesurg.enchentes.core.dto.AuditoriaDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+@CrossOrigin(allowedHeaders = "*")
 @RestController
 public class HistoricoController {
     @Autowired
     private HistoricoUseCase historicoUseCase;
 
     @GetMapping("/historico/listar")
-    public void listar() {
-        historicoUseCase.listar();
+    public List<Historico> listar() {
+        return historicoUseCase.listar();
     }
 
     @PostMapping("/historico/adicionar")

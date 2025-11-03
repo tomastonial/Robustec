@@ -26,15 +26,15 @@ public class AuthService {
 
     public AcessDto login(AuthenticationDTO dto) {
         try {
-            // Autentica usuário + senha
+
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword())
             );
 
-            // Pega detalhes do usuário autenticado
+
             UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
 
-            // Gera token
+
             String token = jwtUtils.generateTokenFromUserDetailsImpl(userDetails);
 
             return new AcessDto(token, userDetails.getUsername(), userDetails.getRole().name(), userDetails.getId());

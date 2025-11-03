@@ -2,6 +2,7 @@ package com.cesurg.enchentes.infra.repository.database;
 
 import com.cesurg.enchentes.core.domain.contract.historico.HistoricoRepository;
 import com.cesurg.enchentes.core.domain.entity.Historico;
+import com.cesurg.enchentes.core.dto.AuditoriaDto;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,20 @@ public class HistoricoRepositoryImpl implements HistoricoRepository {
 
     @Override
     public List<Historico> listar() {
-        var query = entityManager.createQuery("SELECT * FROM Historico", Historico.class);
-        return query.getResultList();
+        var query = """
+        SELECT 
+            h.id AS id,
+            h.tipo AS tipo,
+            h.descricao AS descricao,
+            h.id_produto AS id_produto,
+            u.nome AS nome_usuario,
+            h.data
+        FROM historico h
+        LEFT JOIN usuario u ON u.id = h.id_usuario
+        ORDER BY h.id DESC;
+    """;
+
+        return entityManager.createNativeQuery(query, AuditoriaDto.class)
+                .getResultList();
     }
 }

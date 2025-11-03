@@ -4,25 +4,66 @@ import com.cesurg.enchentes.core.domain.contract.produto.ProdutoUseCase;
 import com.cesurg.enchentes.core.domain.entity.Produto;
 import com.cesurg.enchentes.core.usecase.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 @CrossOrigin(allowedHeaders = "*")
 @RestController
 public class ProdutoController {
+
+    private static String caminhoImagens = "C:/Users/tonia/Desktop/ADS4SEMESTRE/TrabalhoFinalEnchente/imagens/";
+
     @Autowired
     private ProdutoUseCase produtoUseCase;
 
-    @PostMapping("/produto/cadastro")
-    public void create(@RequestBody Produto produto) {
+    @PostMapping(
+            value = "/produto/cadastro",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public Produto create(
+            @ModelAttribute Produto produto,
+            @RequestParam("file") MultipartFile arquivo
+    ) {
         UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
 
         int idUsuario = user.getId();
 
+        try {
+            if (arquivo != null && !arquivo.isEmpty()) {
+                Path pasta = Paths.get(caminhoImagens);
+                if (!Files.exists(pasta)) {
+                    Files.createDirectories(pasta);
+                }
+
+                String original = arquivo.getOriginalFilename();
+                String ext = "";
+                if (original != null && original.lastIndexOf('.') > 0) {
+                    ext = original.substring(original.lastIndexOf('.')).toLowerCase();
+                }
+                String nomeFinal = UUID.randomUUID().toString() + ext;
+
+                Path destino = pasta.resolve(nomeFinal);
+                Files.write(destino, arquivo.getBytes());
+
+                produto.setUrl_imagem(nomeFinal);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         produtoUseCase.create(produto, idUsuario);
+
+        return produto;
     }
 
     @GetMapping("/produto")
@@ -30,14 +71,73 @@ public class ProdutoController {
         return produtoUseCase.read();
     }
 
-    @PutMapping("/produto/{id}")
-    public void update(@RequestBody Produto produto, @PathVariable int id, @PathVariable int usuarioId) {
-        produtoUseCase.update(id, produto, usuarioId);
+    @GetMapping("/produto/{id}")
+    public Produto findById(@PathVariable int id) {
+        return produtoUseCase.findById(id);
+    }
+
+
+    @PutMapping(value = "/produto/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Produto updateJson(@RequestBody Produto produto,
+                              @PathVariable int id) {
+        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+
+        int idUsuario = user.getId();
+
+        produtoUseCase.update(id, produto, idUsuario);
+
+        return produto;
+    }
+
+    @PutMapping(
+            value = "/produto/{id}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public Produto update(@ModelAttribute Produto produto,
+                          @RequestParam("file") MultipartFile arquivo,
+                          @PathVariable int id) {
+        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+
+        int idUsuario = user.getId();
+
+        try {
+            if (arquivo != null && !arquivo.isEmpty()) {
+
+                Path pasta = Paths.get(caminhoImagens);
+                if (!Files.exists(pasta)) {
+                    Files.createDirectories(pasta);
+                }
+
+                String original = arquivo.getOriginalFilename();
+                String ext = "";
+                if (original != null && original.lastIndexOf('.') > 0) {
+                    ext = original.substring(original.lastIndexOf('.')).toLowerCase();
+                }
+                String nomeFinal = UUID.randomUUID().toString() + ext;
+
+                Path destino = pasta.resolve(nomeFinal);
+                Files.write(destino, arquivo.getBytes());
+
+                produto.setUrl_imagem(nomeFinal);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        produtoUseCase.update(id, produto, idUsuario);
+
+        return produto;
     }
 
     @DeleteMapping("/produto/delete/{id}")
-    public void delete(@PathVariable int id, @PathVariable int usuarioId) {
-        produtoUseCase.delete(id, usuarioId);
+    public void delete(@PathVariable int id) {
+        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+
+        int idUsuario = user.getId();
+        produtoUseCase.delete(id, idUsuario);
     }
 
     @GetMapping("/produto/filtro")
