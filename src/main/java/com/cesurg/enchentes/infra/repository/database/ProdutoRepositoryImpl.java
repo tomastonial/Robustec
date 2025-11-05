@@ -148,7 +148,7 @@ public class ProdutoRepositoryImpl implements ProdutoRepository {
             params.put("categoria", categoria);
         }
 
-        sql.append(" WHERE deleted_at IS NULL");
+        sql.append(" AND deleted_at IS NULL");
 
         Query query = entityManager.createNativeQuery(sql.toString(), Produto.class);
 
