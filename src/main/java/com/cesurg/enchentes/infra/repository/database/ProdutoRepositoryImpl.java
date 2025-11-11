@@ -21,10 +21,14 @@ public class ProdutoRepositoryImpl implements ProdutoRepository {
     @Override
     public Produto create(Produto produto) {
         var query = """
-                INSERT INTO produtos (codigo, capacidade_estatica, capacidade_trabalho, reducao, tipo_acionamento, bucha_fixacao_altura, curso_mm, tipo_bucha, bucha_avulsa, base, url_imagem)
-                VALUES (:codigo, :capacidade_estatica, :capacidade_trabalho, :reducao, :tipo_acionamento, :bucha_fixacao_altura, :curso_mm, :tipo_bucha, :bucha_avulsa, :base, :url_imagem);
+                INSERT INTO produtos 
+                (codigo, capacidade_estatica, capacidade_trabalho, reducao, tipo_acionamento, bucha_fixacao_altura, curso_mm, tipo_bucha, bucha_avulsa, base, url_imagem)
+                VALUES 
+                (:codigo, :capacidade_estatica, :capacidade_trabalho, :reducao, :tipo_acionamento, :bucha_fixacao_altura, :curso_mm, :tipo_bucha, :bucha_avulsa, :base, :url_imagem)
+                RETURNING id
                 """;
-        entityManager.createNativeQuery(query).setParameter("codigo", produto.getCodigo())
+
+        Object idGerado = entityManager.createNativeQuery(query).setParameter("codigo", produto.getCodigo())
                 .setParameter("capacidade_estatica", produto.getCapacidade_estatica())
                 .setParameter("capacidade_trabalho", produto.getCapacidade_trabalho())
                 .setParameter("reducao", produto.getReducao())
@@ -35,46 +39,57 @@ public class ProdutoRepositoryImpl implements ProdutoRepository {
                 .setParameter("bucha_avulsa", produto.getBucha_avulsa())
                 .setParameter("base", produto.getBase())
                 .setParameter("url_imagem", produto.getUrl_imagem())
-                .executeUpdate();
+                .getSingleResult();
 
+        produto.setId(((Number) idGerado).intValue());
         return produto;
     }
 
     @Override
     public List<Produto> read() {
-        var query = "SELECT * FROM produtos;";
+        var query = "SELECT * FROM produtos WHERE deleted_at IS NULL;";
         return entityManager.createNativeQuery(query, Produto.class)
                 .getResultList();
     }
 
+    @Override
+    public Produto findById(int id) {
+        var query = "SELECT * FROM produtos WHERE id = :id AND deleted_at IS NULL;";
+        return (Produto) entityManager.createNativeQuery(query, Produto.class)
+                .setParameter("id", id)
+                .getSingleResult();
+    }
+
     @Transactional
     @Override
-    public void update(int id, Produto produto) {
-    var query = """
+    public Produto update(int id, Produto produto) {
+        var query = """
             UPDATE produtos
             SET codigo = :codigo, capacidade_estatica = :capacidade_estatica, capacidade_trabalho = :capacidade_trabalho, reducao = :reducao, tipo_acionamento = :tipo_acionamento, bucha_fixacao_altura = :bucha_fixacao_altura, curso_mm = :curso_mm, tipo_bucha = :tipo_bucha, bucha_avulsa = :bucha_avulsa, base = :base, url_imagem = :url_imagem, categoria = :categoria
             WHERE id = :id
             """;
-    entityManager.createNativeQuery(query).setParameter("codigo", produto.getCodigo())
-            .setParameter("capacidade_estatica", produto.getCapacidade_estatica())
-            .setParameter("capacidade_trabalho", produto.getCapacidade_trabalho())
-            .setParameter("reducao", produto.getReducao())
-            .setParameter("tipo_acionamento", produto.getTipo_acionamento())
-            .setParameter("bucha_fixacao_altura", produto.getBucha_fixacao_altura())
-            .setParameter("curso_mm", produto.getCurso_mm())
-            .setParameter("tipo_bucha", produto.getTipo_bucha())
-            .setParameter("bucha_avulsa", produto.getBucha_avulsa())
-            .setParameter("base", produto.getBase())
-            .setParameter("id", id)
-            .setParameter("url_imagem", produto.getUrl_imagem())
-            .setParameter("categoria", produto.getCategoria())
-            .executeUpdate();
+        entityManager.createNativeQuery(query).setParameter("codigo", produto.getCodigo())
+                .setParameter("capacidade_estatica", produto.getCapacidade_estatica())
+                .setParameter("capacidade_trabalho", produto.getCapacidade_trabalho())
+                .setParameter("reducao", produto.getReducao())
+                .setParameter("tipo_acionamento", produto.getTipo_acionamento())
+                .setParameter("bucha_fixacao_altura", produto.getBucha_fixacao_altura())
+                .setParameter("curso_mm", produto.getCurso_mm())
+                .setParameter("tipo_bucha", produto.getTipo_bucha())
+                .setParameter("bucha_avulsa", produto.getBucha_avulsa())
+                .setParameter("base", produto.getBase())
+                .setParameter("id", id)
+                .setParameter("url_imagem", produto.getUrl_imagem())
+                .setParameter("categoria", produto.getCategoria())
+                .executeUpdate();
+
+        return produto;
     }
 
     @Transactional
     @Override
     public void delete(int id) {
-        var query = "DELETE FROM produtos WHERE id = :id";
+        var query = "UPDATE produtos SET deleted_at = now() WHERE id = :id;";
         entityManager.createNativeQuery(query)
                 .setParameter("id", id)
                 .executeUpdate();
@@ -132,6 +147,8 @@ public class ProdutoRepositoryImpl implements ProdutoRepository {
             sql.append(" AND categoria = :categoria");
             params.put("categoria", categoria);
         }
+
+        sql.append(" AND deleted_at IS NULL");
 
         Query query = entityManager.createNativeQuery(sql.toString(), Produto.class);
 

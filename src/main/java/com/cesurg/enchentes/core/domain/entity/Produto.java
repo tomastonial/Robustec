@@ -4,6 +4,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity(name = "produtos")
 public class Produto {
     @Id
@@ -45,6 +48,16 @@ public class Produto {
 
     @Column(name = "categoria")
     private String categoria;
+
+    private List<ProdutoImagem> imagensProduto = new ArrayList<>();
+
+    public List<ProdutoImagem> getImagensProduto() {
+        return imagensProduto;
+    }
+
+    public void setImagensProduto(List<ProdutoImagem> imagensProduto) {
+        this.imagensProduto = imagensProduto;
+    }
 
     public String getCategoria() {
         return categoria;

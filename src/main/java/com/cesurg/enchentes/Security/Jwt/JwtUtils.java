@@ -24,7 +24,6 @@ public class JwtUtils {
     @Value("${jwt.expirationMs}")
     private int jwtExpirationMs;
 
-    // 🔒 GERA O TOKEN COM ROLE INCLUÍDA
     public String generateTokenFromUserDetailsImpl(UserDetailsImpl userDetails) {
         Map<String, Object> claims = new HashMap<>();
 
@@ -45,13 +44,11 @@ public class JwtUtils {
                 .compact();
     }
 
-    // 🔑 Recupera a chave de assinatura
     private Key getSigningKey() {
         SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
         return key;
     }
 
-    // 🔍 Extrai o username do token
     public String getUsernameFromToken(String token) {
         return Jwts.parser()
                 .setSigningKey(getSigningKey())
@@ -61,7 +58,6 @@ public class JwtUtils {
                 .getSubject();
     }
 
-    // ✅ Valida o token JWT
     public boolean validateJwtToken(String authToken) {
         try {
             Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(authToken);
