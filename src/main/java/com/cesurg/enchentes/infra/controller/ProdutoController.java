@@ -2,6 +2,7 @@ package com.cesurg.enchentes.infra.controller;
 
 import com.cesurg.enchentes.core.domain.contract.produto.ProdutoUseCase;
 import com.cesurg.enchentes.core.domain.entity.Produto;
+import com.cesurg.enchentes.core.domain.entity.ProdutoImagem;
 import com.cesurg.enchentes.core.usecase.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -31,7 +32,7 @@ public class ProdutoController {
     )
     public Produto create(
             @ModelAttribute Produto produto,
-            @RequestParam("file") MultipartFile arquivo
+            @RequestParam(value = "files", required = false) List<MultipartFile> arquivos
     ) {
         UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
@@ -39,23 +40,29 @@ public class ProdutoController {
         int idUsuario = user.getId();
 
         try {
-            if (arquivo != null && !arquivo.isEmpty()) {
                 Path pasta = Paths.get(caminhoImagens);
-                if (!Files.exists(pasta)) {
+                if(!Files.exists(pasta)){
                     Files.createDirectories(pasta);
                 }
 
-                String original = arquivo.getOriginalFilename();
-                String ext = "";
-                if (original != null && original.lastIndexOf('.') > 0) {
-                    ext = original.substring(original.lastIndexOf('.')).toLowerCase();
-                }
-                String nomeFinal = UUID.randomUUID().toString() + ext;
+                if(arquivos != null && !arquivos.isEmpty()){
+                    for(MultipartFile arquivo : arquivos){
+                        String original = arquivo.getOriginalFilename();
+                        String ext = "";
+                        if(original != null && original.lastIndexOf('.') > 0){
+                            ext = original.substring(original.lastIndexOf('.')).toLowerCase();
+                        }
+                        String nomeFinal = UUID.randomUUID().toString() + ext;
 
-                Path destino = pasta.resolve(nomeFinal);
-                Files.write(destino, arquivo.getBytes());
+                        Path destino = pasta.resolve(nomeFinal);
+                        Files.write(destino, arquivo.getBytes());
 
-                produto.setUrl_imagem(nomeFinal);
+                        ProdutoImagem img = new ProdutoImagem();
+                        img.setUrlImagem(nomeFinal);
+                        img.setIdProduto(produto.getId());
+
+                        produto.getImagensProduto().add(img);
+                    }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -77,59 +84,34 @@ public class ProdutoController {
     }
 
 
-    @PutMapping(value = "/produto/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Produto updateJson(@RequestBody Produto produto,
-                              @PathVariable int id) {
-        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder
-                .getContext().getAuthentication().getPrincipal();
-
-        int idUsuario = user.getId();
-
-        produtoUseCase.update(id, produto, idUsuario);
-
-        return produto;
-    }
-
     @PutMapping(
             value = "/produto/{id}",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
-    public Produto update(@ModelAttribute Produto produto,
-                          @RequestParam("file") MultipartFile arquivo,
-                          @PathVariable int id) {
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE )
+    public Produto update(
+            @ModelAttribute Produto produto,
+            @RequestParam("file") MultipartFile arquivo,
+            @PathVariable int id) {
         UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
-
         int idUsuario = user.getId();
-
         try {
             if (arquivo != null && !arquivo.isEmpty()) {
-
                 Path pasta = Paths.get(caminhoImagens);
                 if (!Files.exists(pasta)) {
-                    Files.createDirectories(pasta);
-                }
-
+                    Files.createDirectories(pasta); }
                 String original = arquivo.getOriginalFilename();
                 String ext = "";
                 if (original != null && original.lastIndexOf('.') > 0) {
                     ext = original.substring(original.lastIndexOf('.')).toLowerCase();
                 }
                 String nomeFinal = UUID.randomUUID().toString() + ext;
-
                 Path destino = pasta.resolve(nomeFinal);
                 Files.write(destino, arquivo.getBytes());
-
-                produto.setUrl_imagem(nomeFinal);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        produtoUseCase.update(id, produto, idUsuario);
-
-        return produto;
-    }
+        produtoUseCase.update(id, produto, idUsuario); return produto; }
 
     @DeleteMapping("/produto/delete/{id}")
     public void delete(@PathVariable int id) {
